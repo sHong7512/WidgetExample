@@ -1,43 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/textView2x2"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingVertical="10dp"
+    android:background="#aaffffff"
     android:paddingHorizontal="5dp"
-    android:background="#aaffffff">
-
-    <TextView
-        android:id="@+id/titleText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:maxLines="1"
-        android:ellipsize="middle"
-        android:textStyle="bold"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:text="WidgetExample"
-        android:textColor="#000000" />
-
-    <TextView
-        android:id="@+id/numText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="13sp"
-        android:layout_centerInParent="true"
-        android:text="0"
-        android:textColor="#000000" />
-
-    <Button
-        android:id="@+id/appOpenButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:minHeight="0dp"
-        android:minWidth="0dp"
-        android:textSize="13sp"
-        android:text="open" />
-
-
-</RelativeLayout>
+    android:paddingVertical="10dp"
+    android:gravity="center"
+    android:text="Minimum 2x2 Widget"
+    android:textSize="20sp"
+    android:textStyle="bold" />

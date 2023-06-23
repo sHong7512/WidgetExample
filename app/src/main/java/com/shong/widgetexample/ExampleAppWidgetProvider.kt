@@ -8,6 +8,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.RemoteViews
+import com.shong.klog.Klog
+import kotlin.random.Random
 
 class ExampleAppWidgetProvider : AppWidgetProvider() {
     // 앱 위젯은 여러개가 등록 될 수 있는데, 최초의 앱 위젯이 등록 될 때 호출 됩니다. (각 앱 위젯 인스턴스가 등록 될때마다 호출 되는 것이 아님)
@@ -41,20 +43,29 @@ class ExampleAppWidgetProvider : AppWidgetProvider() {
         super.onUpdate(context, appWidgetManager, appWidgetIds)
         appWidgetIds.forEach { appWidgetId ->
             // Create an Intent to launch ExampleActivity
-            val intent = Intent(context, HandleActivity::class.java).apply {
-                    putExtra(ACTIVITY_HANDLE, MAIN_ACTIVITY)
-                }
-            val pendingIntent: PendingIntent = PendingIntent.getActivity(
-                context,
-                0,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-
-            // Get the layout for the App Widget and attach an on-click listener
-            // to the button
+            val buttonPending: PendingIntent = Intent(context, HandleActivity::class.java).run {
+                putExtra(ACTIVITY_HANDLE, MAIN_ACTIVITY)
+                PendingIntent.getActivity(
+                    context,
+                    0,
+                    this,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            }
             val remoteViews = RemoteViews(context.packageName, R.layout.appwidget_provider_layout)
-            remoteViews.setOnClickPendingIntent(R.id.appOpenButton, pendingIntent)
+            remoteViews.setOnClickPendingIntent(R.id.appOpenButton, buttonPending)
+
+            val numTextPending: PendingIntent =
+                Intent(context, ExampleAppWidgetProvider::class.java).run {
+                    action = ACTION_REQUEST_RANDOM_NUM
+                    PendingIntent.getBroadcast(
+                        context,
+                        appWidgetId,
+                        this,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                }
+            remoteViews.setOnClickPendingIntent(R.id.relativeLayout, numTextPending)
 
             // Tell the AppWidgetManager to perform an update on the current app widget
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
@@ -78,25 +89,30 @@ class ExampleAppWidgetProvider : AppWidgetProvider() {
         super.onReceive(context, intent)
 
         when (intent.action) {
-            ACTION_UPDATE_COUNT -> {
+            ACTION_PROVIDER_UPDATE_COUNT -> {
                 val receiveNum = intent.extras?.getInt(EXTRA_COUNT) ?: -1
-
-                val remoteViews =
-                    RemoteViews(context.packageName, R.layout.appwidget_provider_layout)
-                remoteViews.setTextViewText(R.id.numText, receiveNum.toString())
-
-                AppWidgetManager.getInstance(context).apply {
-                    val appWidgetIds = getAppWidgetIds(
-                        ComponentName(
-                            context,
-                            ExampleAppWidgetProvider::class.java
-                        )
-                    )
-                    updateAppWidget(appWidgetIds, remoteViews)
-                }
+                setCenterText(context, receiveNum.toString())
+            }
+            ACTION_REQUEST_RANDOM_NUM -> {
+                val num = Random.nextInt(100)
+                setCenterText(context, num.toString())
             }
         }
-
     }
 
+    private fun setCenterText(context: Context, str: String) {
+        val remoteViews = RemoteViews(context.packageName, R.layout.appwidget_provider_layout)
+        remoteViews.setTextViewText(R.id.centerText, str)
+
+        AppWidgetManager.getInstance(context).apply {
+            val appWidgetIds = getAppWidgetIds(
+                ComponentName(context, ExampleAppWidgetProvider::class.java)
+            )
+            updateAppWidget(appWidgetIds, remoteViews)
+        }
+        ExamplePref(context).setCenterText(str)
+
+        Klog.runFloating(context)
+        Klog.f("setCenterText", str)
+    }
 }
